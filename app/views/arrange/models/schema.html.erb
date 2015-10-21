@@ -1,0 +1,84 @@
+<%= content_tag :div, class: 'model_list' do %>
+  <%= render "model_list" %>
+<% end %>
+
+<%= content_tag :div, class: 'model_information' do %>
+  <%= content_tag :div, class: 'model_table_schema' do %>
+    <%= content_tag :h2, @model.name %>
+    <% if @model.try :table_comment %>
+      <%= content_tag :h3, @model.table_comment %>
+    <% end %>
+
+    <%= content_tag :table do %>
+      <%= content_tag :thead do %>
+        <%= content_tag :tr do %>
+          <%= content_tag :th, "column name" %>
+          <%= content_tag :th, "type" %>
+          <%= content_tag :th, "default" %>
+          <%= content_tag :th, "not null?" %>
+          <%= content_tag :th, "auto increment?" %>
+          <% if @model.columns.all? { |c| c.try(:comment) } %>
+            <%= content_tag :th, "comment" %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= content_tag :tbody do %>
+        <% @model.columns.each do |column| %>
+          <%= content_tag :tr do %>
+            <%= content_tag :td, column.name %>
+            <%= content_tag :td, column.sql_type %>
+            <% if column.default.nil? %>
+              <%= content_tag :td, 'NULL', class: :default_null %>
+            <% else %>
+              <%= content_tag :td, class: column.type do %>
+                <% if column.type == :boolean %>
+                  <%= column.default == 1 ? 'TRUE' : 'FALSE' %>
+                <% else %>
+                  <%= column.default %>
+                <% end %>
+              <% end %>
+            <% end %>
+            <%= content_tag :td, class: :not_null do %>
+              <% unless column.null %>
+                &#10003;
+              <% end %>
+            <% end %>
+            <%= content_tag :td, class: :auto_increment do %>
+              <% if column.auto_increment? %>
+                &#10003;
+              <% end %>
+            <% end %>
+            <% if column.try :comment %>
+              <%= column.comment %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= content_tag :div, class: 'model_relations' do %>
+      <%= content_tag :h3, 'Relations' %>
+
+      <%= content_tag :table do %>
+        <%= content_tag :thead do %>
+          <%= content_tag :tr do %>
+            <%= content_tag :th %>
+            <%= content_tag :th, 'name' %>
+            <%= content_tag :th, 'model' %>
+          <% end %>
+        <% end %>
+        <%= content_tag :tbody do %>
+          <% @model.reflections.each do |name, relation| %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, relation.macro %>
+              <%= content_tag :td, name %>
+              <%= content_tag :td do %>
+                <%= link_to relation.klass, table_schema_path(table_name: relation.table_name) %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

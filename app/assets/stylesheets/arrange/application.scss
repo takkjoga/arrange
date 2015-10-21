@@ -1,0 +1,99 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+body {
+  background-color: #ffffff;
+  color: #333333;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+pre {
+  padding: 0.5em;
+  overflow: scroll;
+}
+
+$input_font_size: 1.2em;
+
+textarea {
+  width: 30em;
+  height: 10em;
+  font-size: $input_font_size;
+}
+
+input {
+  height: 1.5em;
+  font-size: $input_font_size;
+
+  [type="text"] {
+    width: 30em;
+  }
+  [type="number"],
+  [type="date"],
+  [type="time"] {
+    width: 10em;
+  }
+  [type="datetime"] {
+    width: 23em;
+  }
+}
+
+th {
+  background-color: #eeeeee;
+  border: solid 1px #999999;
+  padding: 0.5em;
+  text-align: center;
+}
+
+td {
+  border: solid 1px #999999;
+  padding: 0.5em;
+}
+
+table {
+  td {
+    &.integer {
+      text-align: right;
+    }
+    &.id,
+    &.operator,
+    &.default_null,
+    &.not_null,
+    &.auto_increment,
+    &.boolean,
+    &.datetime, &.date, &.time
+    {
+      text-align: center;
+    }
+    p {
+      margin: 0;
+      padding: 0.5em;
+    }
+  }
+}
+
+div {
+  &.model_sql_explain pre {
+    background-color: #dddddd;
+    width: 100%;
+  }
+  &.model_list {
+    float: left;
+    margin-right: 5em;
+  }
+  &.model_information {
+    float: left;
+  }
+}

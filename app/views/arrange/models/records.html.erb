@@ -1,0 +1,145 @@
+<%= content_tag :div, class: 'model_list' do %>
+  <%= render "model_list" %>
+<% end %>
+
+<%= content_tag :div, class: 'model_information' do %>
+  <%= content_tag :h2, @model.name %>
+
+  <%= link_to 'New?', table_record_path(table_name: @model.table_name, id: 'new') %>
+
+  <% unless @records.empty? %>
+    <% unless params[:explain].present? %>
+      <%= link_to 'Explain?', table_records_path(table_name: @model.table_name, explain: true, q: params[:q]) %>
+    <% end %>
+
+    <% if @explain.present? %>
+      <%= content_tag :div, class: 'model_sql_explain' do %>
+        <%= content_tag :h3, 'Explain' %>
+        <%= content_tag :pre, @explain %>
+      <% end %>
+    <% end %>
+
+    <%= content_tag :table, class: :records do %>
+      <%= content_tag :thead do %>
+        <%= content_tag :tr do %>
+          <% @model.columns.each do |column| %>
+            <%= content_tag :th do %>
+              <%= sort_link @search, column.name, default_order: :desc %>
+            <% end %>
+          <% end %>
+          <%= content_tag :th %>
+        <% end %>
+      <% end %>
+      <%= content_tag :tbody do %>
+        <% @records.each do |record| %>
+          <%= content_tag :tr do %>
+            <% @model.columns.each do |column| %>
+              <%= content_tag :td, class: [column.type, column.name] do %>
+                <% if column.type == :text %>
+                  <%= content_tag :pre, record.send(column.name) %>
+                <% else %>
+                  <%= content_tag :p do %>
+                    <% if column.name == 'id' %>
+                      <%= link_to record.id, table_record_path(table_name: @model.table_name, id: record.id) %>
+                    <% elsif @belongs[column.name.to_sym].present? && !record.send(column.name).nil? %>
+                      <%= link_to record.send(column.name), table_record_path(table_name: @belongs[column.name.to_sym].table_name, id: record.send(column.name)) %>
+                    <% else %>
+                      <%= record.send(column.name) %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+            <%= content_tag :td do %>
+              <%= link_to "Destroy", destroy_table_record_path(table_name: @model.table_name, id: record.id), method: :delete, data: {confirm: 'Destroy?'} %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= content_tag :h3, 'Refine search' %>
+    <%= search_form_for @search, url: table_records_path(table_name: @model.table_name) do |search_form| %>
+      <%= content_tag :table, class: :refine_search do %>
+        <% @model.columns.each do |column| %>
+          <% case column.type %>
+          <% when :integer %>
+            <%= content_tag :tr do %>
+              <%= content_tag :th, column.name, rowspan: 4 %>
+              <%= content_tag :td, '=', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_eq" %>
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, '>', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_gt" %>
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, '<', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_lt" %>
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, 'IN', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_in" %>
+              <% end %>
+            <% end %>
+          <% when :string, :text %>
+            <%= content_tag :tr do %>
+              <%= content_tag :th, column.name, rowspan: 3 %>
+              <%= content_tag :td, '=', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_eq" %>
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, 'LIKE', rowspan: 2, class: :operator %>
+              <%= content_tag :td do %>
+                %<%= search_form.search_field "#{column.name}_cont" %>%
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_start" %>%
+              <% end %>
+            <% end %>
+          <% when :datetime, :date, :time %>
+            <%= content_tag :tr do %>
+              <%= content_tag :th, column.name, rowspan: 3 %>
+              <%= content_tag :td, '=', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_eq" %>
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, '>', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_gt" %>
+              <% end %>
+            <% end %>
+            <%= content_tag :tr do %>
+              <%= content_tag :td, '<', class: :operator %>
+              <%= content_tag :td do %>
+                <%= search_form.search_field "#{column.name}_lt" %>
+              <% end %>
+            <% end %>
+          <% when :boolean %>
+            <%= content_tag :tr do %>
+              <%= content_tag :th, column.name %>
+              <%= content_tag :td, colspan: 2, class: :operator do %>
+                <%= search_form.select column.name + '_true', [[true, 1], [false, 0]], { include_blank: 'All', selected: params[:q] ? params[:q]["#{column.name}_true"] : '' } %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= search_form.submit 'Search' %>
+    <% end %>
+  <% end %>
+
+<% end %>

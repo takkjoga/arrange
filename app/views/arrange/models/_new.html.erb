@@ -1,0 +1,41 @@
+<%= form_for(@record, url: @path) do |form| %>
+  <%= content_tag :table, class: :record_form do %>
+    <%= content_tag :tr do %>
+      <%= content_tag :th, 'column name' %>
+      <%= content_tag :th, 'type' %>
+      <%= content_tag :th, 'value' %>
+    <% end %>
+    <% @model.columns.each do |column| %>
+      <% unless column.name == @model.primary_key %>
+        <%= content_tag :tr do %>
+          <%= content_tag :th, column.name %>
+          <%= content_tag :td, column.type %>
+          <%= content_tag :td do %>
+            <% case column.type.to_sym %>
+            <% when :integer %>
+              <%= form.number_field column.name, value: @record.send(column.name) %>
+            <% when :string %>
+              <%= form.text_field column.name, value: @record.send(column.name) %>
+            <% when :text %>
+              <%= form.text_area column.name, value: @record.send(column.name) %>
+            <% when :boolean %>
+              <%= form.label column.name, value: true do %>
+                <%= form.radio_button column.name, true %> true
+              <% end %>
+              <%= form.label column.name, value: false do %>
+                <%= form.radio_button column.name, false %> false
+              <% end %>
+            <% when :datetime %>
+              <%= form.datetime_field column.name, value: @record.send(column.name) %>
+            <% when :date %>
+              <%= form.date_field column.name, value: @record.send(column.name) %>
+            <% when :time %>
+              <%= form.time_field column.name, value: @record.send(column.name) %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= form.submit 'Save' %>
+<% end %>

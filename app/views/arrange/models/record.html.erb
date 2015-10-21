@@ -1,0 +1,48 @@
+<%= content_tag :div, class: 'model_list' do %>
+  <%= render "model_list" %>
+<% end %>
+
+<%= content_tag :div, class: 'model_information' do %>
+  <%= content_tag :p, notice, id: 'notice' %>
+
+  <%= content_tag :h2, @model.name %>
+  <%= content_tag :h3, "Record: #{@record.id}" %>
+
+  <% if @record.id.nil? %>
+    <%= render overload_partial_file("new") %>
+  <% else %>
+    <%= link_to "Destroy", destroy_table_record_path(table_name: @model.table_name, id: @record.id), method: :delete, data: {confirm: 'Destroy?'} %>
+
+s   <%= render overload_partial_file("edit") %>
+
+    <%= content_tag :h3, 'Related Records' %>
+
+    <%= content_tag :table do %>
+      <% @relations.each do |name, relation| %>
+        <%= content_tag :tr do %>
+          <%= content_tag :th, relation.macro %>
+          <%= content_tag :td do %>
+            <% case relation.macro.to_sym %>
+            <% when :has_one %>
+              <% if @record.send(relation.name).nil? %>
+                No record.
+              <% else %>
+                <%= link_to table_record_path(@record.send(relation.name).send(relation.klass.primary_key), table_name: relation.table_name) do %>
+                  <%= name %> record.
+                <% end %>
+              <% end %>
+            <% else %>
+              <%= link_to table_records_path(table_name: relation.table_name, relation.foreign_key => @record.id) do %>
+                <%= name %> <%= @record.send(relation.name).count %> records.
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if @relations.count > 0 %>
+      <%= link_to "Destroy with related records", destroy_table_record_path(table_name: @model.table_name, id: @record.id, with_related_records: true), method: :delete, data: {confirm: 'Destroy with related records?'} %>
+    <% end %>
+  <% end %>
+<% end %>
